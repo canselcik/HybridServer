@@ -33,7 +33,6 @@ public class ClientClass implements Runnable {
 		EchoService tcp = new EchoService(out);
 		try {
 			while ( (msg=in.readLine()) != null ) {   
-
 				// Are we dealing with HTTP? If so, we will disconnect right after the request is processed
 				if (msg.toUpperCase().startsWith("GET")){
 					other.log("HTTP GET REQUEST FROM " + remoteAddr);
@@ -52,7 +51,7 @@ public class ClientClass implements Runnable {
 			}
 		}
 		catch (Exception e) {
-			other.log("Error occured while reading/evaluating:" + e.getMessage());
+			other.log("Error occured while reading/evaluating:" + e.toString());
 		}
 		
 		other.log(remoteAddr + " disconnected");
