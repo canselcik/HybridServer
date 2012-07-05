@@ -7,6 +7,8 @@ import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+import configuration.runtimeConfiguration;
+
 public class ClientClass implements Runnable {
 	private Socket cs = null;
 	
@@ -40,18 +42,18 @@ public class ClientClass implements Runnable {
 				// Are we dealing with HTTP? If so, we will disconnect right after the request is processed
 				if (msg.toUpperCase().startsWith("GET")){
 					other.log("HTTP GET REQUEST FROM " + remoteAddr);
-					EntryPoint.runtimeConfig.incHttpAccess();
+					runtimeConfiguration.incHttpAccess();
 			        HTTPResponder.evaluateHTTPRequest(msg, 1, out);
 			        break;
 				}
 				else if(msg.toUpperCase().startsWith("HEAD")){
 					other.log("HTTP HEAD REQUEST FROM " + remoteAddr);
-					EntryPoint.runtimeConfig.incHttpAccess();
+					runtimeConfiguration.incHttpAccess();
 			        HTTPResponder.evaluateHTTPRequest(msg, 2, out);
 			        break;
 				}
 				
-				EntryPoint.runtimeConfig.incTcpAccess();
+				runtimeConfiguration.incTcpAccess();
 				
 				// Or simple TCP?
 				if(tcp.evaluate(msg, remoteAddr) == 0) // If we have 0, it means connection should be closed

@@ -16,6 +16,11 @@ public class EchoService extends GenericTCPResponder {
 			other.log(remoteAddr + " requested to disconnect");
 			return 0;
 		}
+		else if(msg.equals("status")){
+			other.log(remoteAddr + " asked for server status data");
+			stream.writeBytes(other.getStatusInfo(false) + "\r\n");
+			return 1;
+		}
 		else {
 			other.log(remoteAddr + " said " + msg.replaceAll("\r\n", ""));
 			stream.writeBytes("RECV " + msg.replaceAll("\r\n", "") + " at " + other.getTime() + "\r\n");

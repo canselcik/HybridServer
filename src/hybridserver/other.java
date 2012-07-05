@@ -6,12 +6,25 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import configuration.runtimeConfiguration;
+
 public class other {
 	public static String getTime(){
 		Calendar cal = Calendar.getInstance();
 	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	    
 	    return sdf.format(cal.getTime());
+	}
+	
+	public static String getStatusInfo(boolean isHTML){
+		String toReturn = "<small>Server Information:<br>HTTP Access:&nbsp;" + String.valueOf(runtimeConfiguration.getHttpAccess()) +
+				"<br>TCP Access:&nbsp;" + String.valueOf(runtimeConfiguration.getTcpAccess()) + 
+				"<br>Uptime:&nbsp;" + runtimeConfiguration.showUptime() + "&nbsp;minutes</small>";
+		
+		if(!isHTML)
+			toReturn = toReturn.replaceAll("<br>", "\r\n").replaceAll("&nbsp;", " ").replaceAll("<small>", "").replaceAll("</small>", "");
+		
+		return toReturn;
 	}
 	
 	public static void log(String s){

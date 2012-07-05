@@ -8,13 +8,15 @@ public class runtimeConfiguration {
 	private static int tcpAccess = 0;
 	private static int httpAccess = 0;
 	
+	// Add other dorm switches/statuses here
+	
 	public runtimeConfiguration(){
 		init = new Date();
 	}
 	
-	public static String showUptime(){
+	public static String showUptime(){ // in minutes
 		Date now = new Date();
-		return String.valueOf((now.getTime()-init.getTime())/1000);
+		return String.valueOf((now.getTime()-init.getTime())/(60*1000));
 	}
 	
 	public static int getTcpAccess() { return tcpAccess; }
