@@ -34,7 +34,7 @@ public class ClientClass implements Runnable {
 		try {
 			while ( (msg=in.readLine()) != null ) {   
 
-				// Are we dealing with HTTP?
+				// Are we dealing with HTTP? If so, we will disconnect right after the request is processed
 				if (msg.toUpperCase().startsWith("GET")){
 					other.log("HTTP GET REQUEST FROM " + remoteAddr);
 			        HTTPResponder.evaluateHTTPRequest(msg, 1, out);

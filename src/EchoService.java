@@ -10,7 +10,7 @@ public class EchoService extends GenericTCPResponder {
 	public int evaluate(String msg, String remoteAddr) throws IOException {
 		if( msg.equals("exit") || msg.equals("") )
 		{
-			other.log(remoteAddr + " requested to disconnected");
+			other.log(remoteAddr + " requested to disconnect");
 			return 0;
 		}
 		else {
