@@ -40,14 +40,18 @@ public class ClientClass implements Runnable {
 				// Are we dealing with HTTP? If so, we will disconnect right after the request is processed
 				if (msg.toUpperCase().startsWith("GET")){
 					other.log("HTTP GET REQUEST FROM " + remoteAddr);
+					EntryPoint.runtimeConfig.incHttpAccess();
 			        HTTPResponder.evaluateHTTPRequest(msg, 1, out);
 			        break;
 				}
 				else if(msg.toUpperCase().startsWith("HEAD")){
 					other.log("HTTP HEAD REQUEST FROM " + remoteAddr);
+					EntryPoint.runtimeConfig.incHttpAccess();
 			        HTTPResponder.evaluateHTTPRequest(msg, 2, out);
 			        break;
 				}
+				
+				EntryPoint.runtimeConfig.incTcpAccess();
 				
 				// Or simple TCP?
 				if(tcp.evaluate(msg, remoteAddr) == 0) // If we have 0, it means connection should be closed

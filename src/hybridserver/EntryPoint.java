@@ -5,8 +5,8 @@ import java.net.Socket;
 
 public class EntryPoint {
 	
-	
 	static ServerSocket server = null;
+	static configuration.runtimeConfiguration runtimeConfig = null;
 	public static void main(String[] args) {
 		System.out.println("########################################");
 		System.out.println("##   AUTH ROOM ADMINISTRATION SUITE   ##");
@@ -28,6 +28,7 @@ public class EntryPoint {
 			System.exit(-1);
 		}
 		
+		runtimeConfig = new configuration.runtimeConfiguration();
 		other.log("Server started. Now accepting clients from port " + args[0]);
 		
 		while (true) {	

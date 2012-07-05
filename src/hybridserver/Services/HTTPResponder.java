@@ -3,6 +3,8 @@ import hybridserver.other;
 
 import java.io.DataOutputStream;
 
+import configuration.runtimeConfiguration;
+
 public class HTTPResponder {
 	
 	public static void evaluateHTTPRequest(String context, int method, DataOutputStream out) throws Exception{		
@@ -23,12 +25,16 @@ public class HTTPResponder {
 	    
 	    if(method == 1){
 	    	out.writeBytes(other.getHTTPHeader(200, 5));
-	    	if(arguments.startsWith("relay&")){
+	    	if (arguments.startsWith("relay&")){
 	    		other.log("RELAYED DATA FROM " + arguments.substring(6));
 		    	out.writeBytes( other.getHTML(arguments.substring(6)) );
 	    	}
-	    	else
-	    		out.writeBytes("YOU REQUESTED: " + context.substring(start + 2, end));
+	    	else {
+	    		out.writeBytes("<html><body>YOU REQUESTED:&nbsp;" + context.substring(start + 2, end) +
+	    				"<small><br><br>Server Information:<br>HTTP Access:&nbspl" + String.valueOf(runtimeConfiguration.getHttpAccess()) +
+	    				"<br>TCP Access:&nbsp;" + String.valueOf(runtimeConfiguration.getTcpAccess()) + 
+	    				"<br>Uptime:&nbsp;" + runtimeConfiguration.showUptime() + "&nbsp;seconds</small></body></html>");
+	    	}
 	    }
 	    else
 	    	out.writeBytes(other.getHTTPHeader(501, 0)); 
