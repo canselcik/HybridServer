@@ -4,10 +4,15 @@ import hybridserver.other;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class EchoService extends GenericTCPResponder {
+public class EchoService{
 
+	protected DataOutputStream stream = null;
 	public EchoService(DataOutputStream stream) {
-		super(stream);
+		this.stream = stream;
+	}
+	
+	public void send(String data) throws IOException{
+		stream.writeBytes(data);
 	}
 
 	public int evaluate(String msg, String remoteAddr) throws IOException {

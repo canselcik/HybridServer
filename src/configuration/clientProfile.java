@@ -5,5 +5,4 @@ public class clientProfile {
 	public clientProfile(int mode){ // mode = 0:machine 1:observer 2:admin
 		this.mode = mode;
 	}
-	
 }

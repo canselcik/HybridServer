@@ -1,5 +1,8 @@
 package hybridserver;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -9,6 +12,92 @@ import java.util.Calendar;
 import configuration.runtimeConfiguration;
 
 public class other {
+	public static byte[] readFile(File file) {
+		InputStream is = null;
+		try{ is = new FileInputStream(file); }
+		catch (Exception e) { return readFromResource("error.jpg"); }
+
+	    long length = file.length();
+
+	    if (length > Integer.MAX_VALUE) {
+	    	return readFromResource("error.jpg"); // Too large
+	    }
+
+	    byte[] bytes = new byte[(int)length];
+
+	    int offset = 0;
+	    int numRead = 0;
+	    try {
+			while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+			    offset += numRead;
+			}
+		} 
+	    catch (Exception e) {
+	    	return readFromResource("error.jpg");
+		}
+
+	    if (offset < bytes.length) {
+	    	return readFromResource("error.jpg");
+	    }
+
+	    
+	    try {
+			is.close();
+		} 
+	    catch (Exception e) {
+	    	return readFromResource("error.jpg");
+		}
+	    
+	    return bytes;
+	}
+	
+	public static byte[] readFromResource(String name) {
+		InputStream is = null;
+		
+		try { is = ClassLoader.getSystemResourceAsStream(name); }
+		catch (Exception e) { return new byte[0]; }
+
+		long length = 0;
+		
+		try {
+			length = is.available();
+		}
+		catch (Exception e){
+			return new byte[0];
+		}
+
+	    if (length > Integer.MAX_VALUE) {
+	        return new byte[0]; // Too large
+	    }
+
+	    byte[] bytes = new byte[(int)length];
+
+	    int offset = 0;
+	    int numRead = 0;
+	    try {
+			while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+			    offset += numRead;
+			}
+		} 
+	    catch (Exception e) {
+			return new byte[0];
+		}
+
+	    if (offset < bytes.length) {
+	        return new byte[0];
+	    }
+
+	    
+	    try {
+			is.close();
+		} 
+	    catch (Exception e) {
+			return new byte[0];
+		}
+	    
+	    return bytes;
+	}
+	
 	public static String getTime(){
 		Calendar cal = Calendar.getInstance();
 	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
