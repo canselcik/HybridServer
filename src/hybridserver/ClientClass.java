@@ -1,10 +1,9 @@
 package hybridserver;
+
 import hybridserver.Services.EchoService;
 import hybridserver.Services.HTTPResponder;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
@@ -42,12 +41,7 @@ public class ClientClass implements Runnable {
 		try {
 			while ( (msg=in.readLine()) != null ) {   
 
-				try {
-					out.writeBytes("DEBUG ---------> " + msg);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				other.log("[DEBUG] RECV CONTENT: --->" + msg);
 				
 				// Are we dealing with HTTP? If so, we will disconnect right after the request is processed
 				if (msg.toUpperCase().startsWith("GET")){

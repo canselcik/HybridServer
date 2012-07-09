@@ -20,6 +20,7 @@ public class other {
 	    long length = file.length();
 
 	    if (length > Integer.MAX_VALUE) {
+	    	try { is.close(); } catch(Exception e) { }
 	    	return readFromResource("error.jpg"); // Too large
 	    }
 
@@ -33,10 +34,12 @@ public class other {
 			}
 		} 
 	    catch (Exception e) {
+	    	try { is.close(); } catch(Exception ex) { }
 	    	return readFromResource("error.jpg");
 		}
 
 	    if (offset < bytes.length) {
+	    	try { is.close(); } catch(Exception e) { }
 	    	return readFromResource("error.jpg");
 	    }
 
