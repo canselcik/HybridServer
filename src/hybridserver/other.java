@@ -12,6 +12,23 @@ import java.util.Calendar;
 import configuration.runtimeConfiguration;
 
 public class other {
+	public static String getArguments(String context){
+		int start = 0;
+	    int end = 0;
+	    
+	    for (int a = 0; a < context.length(); a++) {
+	    	if (context.charAt(a) == ' ' && start != 0) {
+	    		end = a;
+	            break;
+	        }
+	        if (context.charAt(a) == ' ' && start == 0) {
+	            start = a;
+	        }
+	    }
+	    
+	    return context.substring(start + 2, end);
+	}
+	
 	public static byte[] readFile(File file) {
 		InputStream is = null;
 		try{ is = new FileInputStream(file); }
@@ -183,6 +200,8 @@ public class other {
 	        s = s + "Content-Type: image/gif\r\n";
 	      case 3:
 	        s = s + "Content-Type: application/x-zip-compressed\r\n";
+	      case 4:
+	    	s = s + "Content-Type: application/pdf\r\n";
 	      default:
 	        s = s + "Content-Type: text/html\r\n";
 	        break;

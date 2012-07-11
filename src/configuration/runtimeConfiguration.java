@@ -8,7 +8,7 @@ public class runtimeConfiguration {
 	private static int tcpAccess = 0;
 	private static int httpAccess = 0;
 	
-	// Add other dorm switches/statuses here
+	// TODO: Add other dorm switches/statuses here
 	
 	public runtimeConfiguration(){
 		init = new Date();

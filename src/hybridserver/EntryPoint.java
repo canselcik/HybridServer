@@ -31,7 +31,7 @@ public class EntryPoint {
 		runtimeConfig = new configuration.runtimeConfiguration();
 		other.log("Server started. Now accepting clients from port " + args[0]);
 		
-		while (true) {	
+		while (true) {	// Will be running until KeyboardInterrupt
 			Socket clientSocket = null;
 			try {
 			    clientSocket = server.accept();
@@ -43,6 +43,7 @@ public class EntryPoint {
 			    System.out.println("Accept failed on port " + args[0]);
 			}
 		}
+		
 	}
 	
 	

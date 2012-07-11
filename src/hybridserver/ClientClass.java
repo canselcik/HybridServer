@@ -10,6 +10,8 @@ import java.net.Socket;
 import configuration.runtimeConfiguration;
 
 public class ClientClass implements Runnable {
+	
+	
 	private Socket cs = null;
 	
 	public ClientClass(Socket cs){
@@ -32,34 +34,33 @@ public class ClientClass implements Runnable {
 		}
 		catch(Exception e)
 		{
-			other.log("Error occured while initiating client");
+			other.log("Error occured while getting the outputStream for " + remoteAddr);
+			return;
 		}
 		
-		
-		// It needs to be here since we are holding a session (unlike HTTP)
+		// For RAW TCP communication, we are holding a session
 		EchoService tcp = new EchoService(out);
 		try {
 			while ( (msg=in.readLine()) != null ) {   
 
-				other.log("[DEBUG] RECV CONTENT: --->" + msg);
+				other.log("[DEBUG] RECEIVED MESSAGE: --->" + msg);
 				
 				// Are we dealing with HTTP? If so, we will disconnect right after the request is processed
 				if (msg.toUpperCase().startsWith("GET")){
 					other.log("HTTP GET REQUEST FROM " + remoteAddr);
 					runtimeConfiguration.incHttpAccess();
-			        HTTPResponder.evaluateHTTPRequest(msg, 1, out);
-			        break;
+			    	HTTPResponder.evaluateHTTPRequest(msg, 1, out); // GET request defined by 1
+			    	break;
 				}
-				else if(msg.toUpperCase().startsWith("HEAD")){
+				else if (msg.toUpperCase().startsWith("HEAD")){
 					other.log("HTTP HEAD REQUEST FROM " + remoteAddr);
 					runtimeConfiguration.incHttpAccess();
-			        HTTPResponder.evaluateHTTPRequest(msg, 2, out);
+			    	HTTPResponder.evaluateHTTPRequest(msg, 2, out); // HEAD request defined by 2
 			        break;
 				}
 				
-				runtimeConfiguration.incTcpAccess();
-				
 				// Or simple TCP?
+				runtimeConfiguration.incTcpAccess();
 				if(tcp.evaluate(msg, remoteAddr) == 0) // If we have 0, it means connection should be closed
 					break;
 			}

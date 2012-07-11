@@ -6,61 +6,68 @@ import java.io.File;
 public class HTTPResponder {
 	
 	public static void evaluateHTTPRequest(String context, int method, DataOutputStream out) throws Exception {		
-		int start = 0;
-	    int end = 0;
+		String arguments = other.getArguments(context);
 	    
-	    for (int a = 0; a < context.length(); a++) {
-	    	if (context.charAt(a) == ' ' && start != 0) {
-	    		end = a;
-	            break;
-	        }
-	        if (context.charAt(a) == ' ' && start == 0) {
-	            start = a;
-	        }
-	    }
-	    
-	    String arguments = context.substring(start + 2, end);
-	    
-	    if(method == 1){
-	    	if( !arguments.startsWith("live") || arguments.endsWith(".html") || 
-	    									arguments.endsWith(".php") || arguments.endsWith(".css") || arguments.endsWith(".js") )
-	    		out.writeBytes(other.getHTTPHeader(200, 5)); // HTML header
-	    	else
-	    		out.writeBytes(other.getHTTPHeader(200, 1)); // image header
-	    	
-	    	// Streaming a file from HDD
+	    if(method == 1) // If it is a GET request
+	    {
+	    	boolean knownToExist = false;
+	    	// Empty argument means root and we should look for indexes...
 	    	if( arguments.equals("") ) {
-	    		if(new File("index.php").exists())
+	    		if(new File("index.php").exists()){
 	    			arguments = "index.php";
-	    	}
-	    	if(new File(arguments).exists()) {
-	    		byte[] file = other.readFile( new File(arguments) );
-	    		other.log("[DEBUG] READ " + file.length + " from " + arguments + "... now streaming");
-	    		out.write(file);
+	    			knownToExist = true;
+	    		}
+	    		else if(new File("index.html").exists()){
+	    			arguments = "index.html";
+	    			knownToExist = true;
+	    		}
+	    		else if(new File("default.php").exists()){
+	    			arguments = "default.php";
+	    			knownToExist = true;
+	    		}
+	    		else if(new File("default.html").exists()){
+	    			arguments = "default.html";
+	    			knownToExist = true;
+	    		}
 	    	}
 	    	
+	    	// Let's handle the HEADER
+	    	if( arguments.equals("live") || arguments.endsWith(".gif") || arguments.endsWith(".jpg") || arguments.endsWith(".png") )
+	    		out.writeBytes( other.getHTTPHeader(200, 1) );
+	    	else if( arguments.endsWith(".html") || arguments.endsWith(".php") )
+	    		out.writeBytes( other.getHTTPHeader(200, 5) );
+	    	else if( arguments.endsWith(".pdf") )
+	    		out.writeBytes( other.getHTTPHeader(200, 4) );
+	    	else // Assuming that every unidentified file is text/html
+	    		out.writeBytes( other.getHTTPHeader(200, 5) ); 
 	    	
-	    	// Relaying a web page
-	    	if (arguments.startsWith("relay&")){
+	    	// Let's now write the actual data
+	    	if (arguments.startsWith("relay&")) { // Relaying if it is a relay request
 	    		other.log("RELAYED DATA FROM " + arguments.substring(6));
 		    	out.writeBytes( other.getHTML(arguments.substring(6)).replace("<body>", "<body><center><p style='font-size:x-large;'>" +
 		    			"												THIS SITE IS RELAYED THROUGH THE 'AUTH' SERVER</p></center>")
 		    			.replace("</body>", "<center>" + other.getStatusInfo(true) + "</center></body>"));
-	    	} // Sending the pre-determined URL (custom)
-	    	else if(arguments.startsWith("live")){
-	    		byte[] image = other.readFile( new File("last.jpg") );  // Looks for the newest frame
+	    	} 
+	    	else if( arguments.equals("live") ){ // Checking if it is a "live" request
+	    		byte[] image = other.readFile( new File("last.jpg") );  // TODO: Modify in way that it takes the image off of memory
 	    		
 	    		if (image.length == 0)
 	    			image = other.readFromResource("error.jpg");
 	    		else 
 	    			out.write(image);	
 	    	}
-	    	else { // Maybe the error page
-	    		out.writeBytes("<html><body>Your HybridServer REQUEST:&nbsp;" + context.substring(start + 2, end) + "<br><br>" + other.getStatusInfo(true)
+	    	// Writing the file - if it actually is a file and it exists
+	    	else if( !arguments.equals("live") && (knownToExist || new File(arguments).exists()) ) {
+	    		byte[] file = other.readFile( new File(arguments) );
+	    		other.log("[DEBUG] READ " + file.length + " bytes from " + arguments + "... now streaming");
+	    		out.write(file);
+	    	}
+	    	else { // If nothing fits - error page
+	    		out.writeBytes("<html><body>Your HybridServer REQUEST:&nbsp;" + arguments + "<br><br>" + other.getStatusInfo(true)
 	    				+ "</body></html>");
 	    	}
-	    }
-	    else
+	    } 
+	    else // If it is a HEAD request
 	    	out.writeBytes(other.getHTTPHeader(501, 0)); 
 	}
 	
