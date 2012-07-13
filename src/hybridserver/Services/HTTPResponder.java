@@ -63,7 +63,7 @@ public class HTTPResponder {
 	    		out.write(file);
 	    	}
 	    	else { // If nothing fits - error page
-	    		out.writeBytes("<html><body>Your HybridServer REQUEST is an invalid.<br>Your argument was " + arguments +
+	    		out.writeBytes("<html><body>Your HybridServer REQUEST is invalid.<br>Your argument was " + arguments +
 	    				"<br><br><br>AUTH HybridServer is capable of handling raw TCP connections and HTTP GET and HEAD requests.<br><br>" +
 	    				"Here are the valid HTTP arguments:<br>-&nbsp;live<br>-&nbsp;Files on the filesystem<br>-&nbsp;relay&http://www.anysite.com<br><br><br>" + other.getStatusInfo(true)
 	    				+ "</body></html>");

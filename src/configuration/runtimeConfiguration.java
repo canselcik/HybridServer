@@ -24,5 +24,4 @@ public class runtimeConfiguration {
 	
 	public static void incTcpAccess() { tcpAccess++; }
 	public static void incHttpAccess() { httpAccess++; }
-	
 }

@@ -18,7 +18,7 @@ public class EntryPoint {
 			System.out.println("USAGE: java -jar hybrid.jar [port]");
 			System.exit(-1);
 		}
-				
+		
 		other.log("Initializing the system");
 		try {
 			server = new ServerSocket(Integer.parseInt(args[0]));
