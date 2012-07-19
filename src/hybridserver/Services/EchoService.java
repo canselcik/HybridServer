@@ -15,9 +15,11 @@ public class EchoService{
 		stream.writeBytes(data);
 	}
 
+	private boolean receiving = false;
+	// TODO: Add the image upload through TCP feature
+	// Have an indicator for upload start and upload end
 	public int evaluate(String msg, String remoteAddr) throws IOException {
-		if( msg.equals("exit") || msg.equals("") )
-		{
+		if( msg.equals("exit") || msg.equals("") ) {
 			other.log(remoteAddr + " requested to disconnect");
 			return 0;
 		}
