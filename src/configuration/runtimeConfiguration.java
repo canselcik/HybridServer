@@ -1,5 +1,6 @@
 package configuration;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Date;
 
 public class runtimeConfiguration {
@@ -9,6 +10,8 @@ public class runtimeConfiguration {
 	private static int httpAccess = 0;
 	
 	// TODO: Add other dorm switches/statuses here
+	public static ByteArrayOutputStream telemetryData = null;
+	public static byte[] lastTelemetry = null;
 	
 	public runtimeConfiguration(){
 		init = new Date();

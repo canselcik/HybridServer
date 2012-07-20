@@ -3,6 +3,8 @@ import hybridserver.other;
 import java.io.DataOutputStream;
 import java.io.File;
 
+import configuration.runtimeConfiguration;
+
 public class HTTPResponder {
 	
 	public static void evaluateHTTPRequest(String context, int method, DataOutputStream out) throws Exception {		
@@ -49,12 +51,14 @@ public class HTTPResponder {
 		    			.replace("</body>", "<center>" + other.getStatusInfo(true) + "</center></body>"));
 	    	} 
 	    	else if( arguments.equals("live") ){ // Checking if it is a "live" request
-	    		byte[] image = other.readFile( new File("last.jpg") );  // TODO: Modify in way that it takes the image off of memory
-	    		
-	    		if (image.length == 0)
-	    			image = other.readFromResource("error.jpg");
-	    		else 
-	    			out.write(image);	
+	    		if(runtimeConfiguration.lastTelemetry == null || runtimeConfiguration.lastTelemetry.length <= 0) {
+	    			other.log("Video Telemetry frame doesn't exist -- error frame will be transmitted instead");
+	    			runtimeConfiguration.lastTelemetry = other.readFromResource("error.jpg");
+	    		}
+	    			
+	    		out.write(runtimeConfiguration.lastTelemetry);
+	    		other.log("Relayed room video telemetry frame through HTTP");
+	    			
 	    	}
 	    	// Writing the file - if it actually is a file and it exists
 	    	else if( !arguments.equals("live") && (knownToExist || new File(arguments).exists()) ) {

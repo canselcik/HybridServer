@@ -36,7 +36,7 @@ public class EntryPoint {
 			try {
 			    clientSocket = server.accept();
 			    
-			    Runnable r = new ClientClass(clientSocket);
+			    Runnable r = new HandleClientComm(clientSocket);
 			    new Thread(r).start();
 			}
 			catch (IOException e) {
