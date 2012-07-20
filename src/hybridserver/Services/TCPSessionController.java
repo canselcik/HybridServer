@@ -28,7 +28,18 @@ public class TCPSessionController{
 				isAuthenticated = true;	
 				other.log(msg.split(":")[0] + " logged in");
 				send("+ AUTHENTICATED");
+				
 				return 1; // Keep-alive
+			}
+			
+			if(msg.equals("room:kp5g6d")){
+				isAuthenticated = true;
+				other.log("ROOM HAS JUST LOGGED IN -- necessary info will be forwarded to it (" + remoteAddr + ")");
+				
+				runtime.setRoomPipe(stream);
+				send("+ ROOM_STATUS_ASSIGNED");
+				
+				return 1;
 			}
 			
 			other.log("FAILED log-in attempt");
@@ -40,7 +51,11 @@ public class TCPSessionController{
 			other.log(remoteAddr + " requested to disconnect");
 			return 0;
 		}
-		else if(msg.equals("status") ){
+		else if ( msg.startsWith("broadcast ")) {  // Broadcast data to the room -- for debugging purposes mostly
+			other.log("Data relayed to the room: " + msg.split(" ")[1]);
+			runtime.broadcast(msg.split(" ")[1]);
+		}
+		else if (msg.equals("status") ){
 			other.log(remoteAddr + " asked for server status data");
 			stream.writeBytes(other.getStatusInfo(false) + "\r\n");
 		}
