@@ -1,12 +1,11 @@
 package configuration;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Date;
 
 public class runtime {
 	
 	// TODO: Add other dorm switches/statuses here
-	public static ByteArrayOutputStream telemetryData = null;
+	// TODO: Find a way for the AUTH DORM to connect with the server and recv/transmit realtime communique
 	public static byte[] lastTelemetry = null;
 	
 		
@@ -19,8 +18,9 @@ public class runtime {
 		init = new Date();
 	}
 	
+	public static Date now = null;
 	public static String showUptime(){ // in minutes
-		Date now = new Date();
+		now = new Date();
 		return String.valueOf((now.getTime()-init.getTime())/(60*1000));
 	}
 	
