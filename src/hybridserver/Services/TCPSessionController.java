@@ -1,7 +1,6 @@
 package hybridserver.Services;
-import hybridserver.other;
 
-import java.io.ByteArrayOutputStream;
+import hybridserver.other;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import javax.xml.bind.DatatypeConverter;
@@ -20,7 +19,23 @@ public class TCPSessionController{
 	}
 
 	public boolean isRecv = false;
+	public boolean isAuthenticated = false;
 	public int evaluate(String msg, String remoteAddr) throws IOException {
+		if(!isAuthenticated){
+			// Since we don't have a lot of users and we don't need the user:key pairs to be
+			// changed often, we can just embed those into the code
+			if (msg.equals("can:12345") || msg.equals("jordan:12345")){
+				isAuthenticated = true;	
+				other.log(msg.split(":")[0] + " logged in");
+				send("+ AUTHENTICATED");
+				return 1; // Keep-alive
+			}
+			
+			other.log("FAILED log-in attempt");
+			return 0; // Disconnect if the user is still not authenticated at this point
+		}
+		
+		
 		if( msg.equals("exit") || msg.equals("") ) {
 			other.log(remoteAddr + " requested to disconnect");
 			return 0;
@@ -31,20 +46,14 @@ public class TCPSessionController{
 		}
 		else if( msg.equals("startlive") ){
 			isRecv = true;
-			runtime.telemetryData = new ByteArrayOutputStream();
 			
 			other.log("Now waiting for telemetry data encoded as LexicalBSD-Base64");
 			send("+ PROCEED");
 		}
 		else if( msg.equals("stoplive") ){
 			isRecv = false;
-
-			if(runtime.telemetryData != null && runtime.telemetryData.size() > 0)
-				runtime.lastTelemetry = runtime.telemetryData.toByteArray();
-			else
-				runtime.lastTelemetry = other.readFromResource("error.jpg");
 			
-			other.log("Done expecting telemetry data");
+			other.log("Confirmed done with the telemetry data - broadcasting...");
 			send("+ CONFIRMED " + runtime.lastTelemetry.length);
 		}
 		else {
@@ -54,13 +63,17 @@ public class TCPSessionController{
 			}
 			else { // Now we are receiving live telemetry data
 				try {
-					byte[] recvData = DatatypeConverter.parseBase64Binary(msg);
+					runtime.lastTelemetry = DatatypeConverter.parseBase64Binary(msg); 
 					
-					if(runtime.telemetryData != null && recvData != null && recvData.length != 0)
-						runtime.telemetryData.write(recvData);
+					other.log("Telemetry data is decoded - waiting for broadcast notice");
+					send("+ CONFIRMED " + msg.length());
 				}
 				catch (Exception e) {
 					other.log("Error occured while reading telemetry data: " + e.toString());
+					isRecv = false;
+					
+					// Now let's get back the error message
+					runtime.lastTelemetry = other.readFromResource("error.jpg");
 				}
 			}
 		}
