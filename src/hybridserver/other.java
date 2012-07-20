@@ -136,7 +136,7 @@ public class other {
 		return toReturn;
 	}
 	
-	public static void log(String s){
+	public static void log(String s) {
 		System.out.println(getTime() + " -- " + s);
 	}
 		
