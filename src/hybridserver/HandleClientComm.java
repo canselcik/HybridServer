@@ -1,6 +1,6 @@
 package hybridserver;
 
-import hybridserver.Services.EchoService;
+import hybridserver.Services.TCPSessionController;
 import hybridserver.Services.HTTPResponder;
 import java.io.BufferedReader;
 //import java.io.DataInputStream;
@@ -8,7 +8,7 @@ import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-import configuration.runtimeConfiguration;
+import configuration.runtime;
 
 public class HandleClientComm implements Runnable {
 	
@@ -42,7 +42,7 @@ public class HandleClientComm implements Runnable {
 		}
 		
 		// For RAW TCP communication, we are holding a session
-		EchoService tcp = new EchoService(out);
+		TCPSessionController tcp = new TCPSessionController(out);
 		try {
 			while ( (msg=in.readLine()) != null ) {   
 
@@ -52,19 +52,19 @@ public class HandleClientComm implements Runnable {
 				// Are we dealing with HTTP? If so, we will disconnect right after the request is processed
 				if (msg.toUpperCase().startsWith("GET")){
 					other.log("HTTP GET REQUEST FROM " + remoteAddr);
-					runtimeConfiguration.incHttpAccess();
+					runtime.incHttpAccess();
 			    	HTTPResponder.evaluateHTTPRequest(msg, 1, out); // GET request defined by 1
 			    	break;
 				}
 				else if (msg.toUpperCase().startsWith("HEAD")){
 					other.log("HTTP HEAD REQUEST FROM " + remoteAddr);
-					runtimeConfiguration.incHttpAccess();
+					runtime.incHttpAccess();
 			    	HTTPResponder.evaluateHTTPRequest(msg, 2, out); // HEAD request defined by 2
 			        break;
 				}
 				
 				// Or simple TCP?
-				runtimeConfiguration.incTcpAccess();
+				runtime.incTcpAccess();
 				if(tcp.evaluate(msg, remoteAddr) == 0) // If we have 0, it means connection should be closed
 					break;
 			}

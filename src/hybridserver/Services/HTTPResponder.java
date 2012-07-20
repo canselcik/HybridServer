@@ -3,7 +3,7 @@ import hybridserver.other;
 import java.io.DataOutputStream;
 import java.io.File;
 
-import configuration.runtimeConfiguration;
+import configuration.runtime;
 
 public class HTTPResponder {
 	
@@ -51,12 +51,12 @@ public class HTTPResponder {
 		    			.replace("</body>", "<center>" + other.getStatusInfo(true) + "</center></body>"));
 	    	} 
 	    	else if( arguments.equals("live") ){ // Checking if it is a "live" request
-	    		if(runtimeConfiguration.lastTelemetry == null || runtimeConfiguration.lastTelemetry.length <= 0) {
+	    		if(runtime.lastTelemetry == null || runtime.lastTelemetry.length <= 0) {
 	    			other.log("Video Telemetry frame doesn't exist -- error frame will be transmitted instead");
-	    			runtimeConfiguration.lastTelemetry = other.readFromResource("error.jpg");
+	    			runtime.lastTelemetry = other.readFromResource("error.jpg");
 	    		}
 	    			
-	    		out.write(runtimeConfiguration.lastTelemetry);
+	    		out.write(runtime.lastTelemetry);
 	    		other.log("Relayed room video telemetry frame through HTTP");
 	    			
 	    	}

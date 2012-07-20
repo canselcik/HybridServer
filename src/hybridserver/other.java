@@ -9,7 +9,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import configuration.runtimeConfiguration;
+import configuration.runtime;
 
 public class other {
 	public static String getArguments(String context){
@@ -126,9 +126,9 @@ public class other {
 	}
 	
 	public static String getStatusInfo(boolean isHTML){
-		String toReturn = "<small>Server Information:<br>HTTP Access:&nbsp;" + String.valueOf(runtimeConfiguration.getHttpAccess()) +
-				"<br>TCP Access:&nbsp;" + String.valueOf(runtimeConfiguration.getTcpAccess()) + 
-				"<br>Uptime:&nbsp;" + runtimeConfiguration.showUptime() + "&nbsp;minutes</small>";
+		String toReturn = "<small>Server Information:<br>HTTP Access:&nbsp;" + String.valueOf(runtime.getHttpAccess()) +
+				"<br>TCP Access:&nbsp;" + String.valueOf(runtime.getTcpAccess()) + 
+				"<br>Uptime:&nbsp;" + runtime.showUptime() + "&nbsp;minutes</small>";
 		
 		if(!isHTML)
 			toReturn = toReturn.replaceAll("<br>", "\r\n").replaceAll("&nbsp;", " ").replaceAll("<small>", "").replaceAll("</small>", "");
