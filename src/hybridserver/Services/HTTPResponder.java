@@ -44,12 +44,20 @@ public class HTTPResponder {
 	    		out.writeBytes( other.getHTTPHeader(200, 5) ); 
 	    	
 	    	// Let's now write the actual data
-	    	if (arguments.startsWith("relay&")) { // Relaying if it is a relay request
+	    	if (arguments.startsWith("relay?")) { // Relaying if it is a relay request
 	    		other.log("RELAYED DATA FROM " + arguments.substring(6));
 		    	out.writeBytes( other.getHTML(arguments.substring(6)).replace("<body>", "<body><center><p style='font-size:x-large;'>" +
 		    			"												THIS SITE IS RELAYED THROUGH THE 'AUTH' SERVER</p></center>")
 		    			.replace("</body>", "<center>" + other.getStatusInfo(true) + "</center></body>"));
 	    	} 
+	    	else if( arguments.startsWith("broadcast?") ) { // TODO: Add authentication here
+	    		String toRelay = arguments.replace("broadcast?", "");
+	    		other.log("HTTP data relay request to the room: " + toRelay);
+	    		if (runtime.broadcast("+ EVENT " + toRelay) == true)
+	    			out.writeBytes("OK");
+	    		else
+	    			out.writeBytes("ERROR");
+	    	}
 	    	else if( arguments.equals("live") ){ // Checking if it is a "live" request
 	    		if(runtime.lastTelemetry == null || runtime.lastTelemetry.length <= 0) {
 	    			other.log("Video Telemetry frame doesn't exist -- error frame will be transmitted instead");
@@ -69,12 +77,12 @@ public class HTTPResponder {
 	    	else { // If nothing fits - error page
 	    		out.writeBytes("<html><body>Your HybridServer REQUEST is invalid.<br>Your argument was " + arguments +
 	    				"<br><br><br>AUTH HybridServer is capable of handling raw TCP connections and HTTP GET and HEAD requests.<br><br>" +
-	    				"Here are the valid HTTP arguments:<br>-&nbsp;live<br>-&nbsp;Files on the filesystem<br>-&nbsp;relay&http://www.anysite.com<br><br><br>" + other.getStatusInfo(true)
+	    				"Here are the valid HTTP arguments:<br>-&nbsp;live<br>-&nbsp;Files on the filesystem<br>-&nbsp;-broadcast?argument<br>-&nbsp;relay?http://www.anysite.com<br><br><br>" + other.getStatusInfo(true)
 	    				+ "</body></html>");
 	    	}
 	    } 
 	    else // If it is a HEAD request
-	    	out.writeBytes(other.getHTTPHeader(501, 0)); 
+	    	out.writeBytes(other.getHTTPHeader(501, 0)); // Not implemented
 	}
 	
 	
