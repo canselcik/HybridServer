@@ -69,7 +69,11 @@ public class TCPSessionController{
 		}
 		else if ( msg.startsWith("broadcast ")) {  // Broadcast data to the room -- for debugging purposes mostly
 			other.log("Data relayed to the room: " + msg.split(" ")[1]);
-			runtime.broadcast("+ EVENT " + msg.split(" ")[1]);
+			
+			if(runtime.broadcast("+ EVENT " + msg.split(" ")[1]))
+				stream.writeBytes("+ OK");
+			else
+				stream.writeBytes("+ ERROR");
 		}
 		else if (msg.equals("status") ){
 			other.log(remoteAddr + " asked for server status data");
