@@ -3,7 +3,6 @@ package hybridserver.Services;
 import hybridserver.other;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import javax.xml.bind.DatatypeConverter;
 
 import configuration.runtime;
@@ -21,48 +20,29 @@ public class TCPSessionController{
 
 	public boolean isRecv = false;
 	public boolean isAuthenticated = false;
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public boolean isRoomSession = false;
 	public int evaluate(String msg, String remoteAddr) throws IOException {
 		if(!isAuthenticated){
-			// Since we don't have a lot of users and we don't need the user:key pairs to be
-			// changed often, we can just embed those into the code
-			if(msg.contains(":")){
-				String[] pair = msg.split(":");
-				
-				HashMap d = new HashMap<String, String>();
-				d.put("can", "3627909A29C31381A071EC27F7C9CA97726182AED29A7DDD2E54353" +
-							"322CFB30ABB9E3A6DF2AC2C20FE23436311D678564D0C8D305930575F60E2D3D048184D79");
-				d.put("jordan", "3627909A29C31381A071EC27F7C9CA97726182AED29A7DDD2E54353" +
-						"322CFB30ABB9E3A6DF2AC2C20FE23436311D678564D0C8D305930575F60E2D3D048184D79");
-				d.put("room", "61F1559B07878560A72E897573621B5EFC34DAA75908F20E0046AF9FB8" +
-							"61192425614E7CBCAAF107359FCE7E77B425704CDDC7CA5F523203B986A802E433AF7F");
-				
-				if(pair.length == 2){
-					String hash = other.getSHA512Hash(pair[1]).toUpperCase();
-					
-					if(d.get(pair[0]).equals(hash)){ // Hash matches
-						isAuthenticated = true;	
-						
-						if(pair[0].equals("room")){ // It is the room logging in
-							other.log("ROOM HAS JUST LOGGED IN -- necessary info will be forwarded to it (" + remoteAddr + ")");
-							
-							runtime.setRoomPipe(stream);
-							send("+ ROOM_STATUS_ASSIGNED");
-						}
-						else{ // It is a user logging in
-							other.log(msg.split(":")[0] + " logged in");
-							send("+ AUTHENTICATED");
-						}
-						return 1; // Keep-alive
-					}
-				}
+			switch(other.authenticate(msg)){
+				case 0: // FAILED
+					other.log("FAILED log-in attempt");
+					return 0; // Disconnect
+				case 1: // USER
+					other.log(msg.split(":")[0] + " logged in");
+					send("+ AUTHENTICATED");
+					isAuthenticated = true;
+					return 1; // Keep-Alive but skip future succession
+				case 2: // ROOM
+					other.log("ROOM HAS JUST LOGGED IN -- necessary info will be forwarded to it");
+					runtime.setRoomPipe(stream);
+					send("+ ROOM_STATUS_ASSIGNED");
+					isRoomSession = true;
+					isAuthenticated = true;
+					return 1; // Keep-Alive but skip future succession
 			}
-			
-			other.log("FAILED log-in attempt");
-			return 0; // Disconnect if the user is still not authenticated at this point
 		}
 		
-		
+
 		if( msg.equals("exit") || msg.equals("") ) {
 			other.log(remoteAddr + " requested to disconnect");
 			return 0;
@@ -92,7 +72,7 @@ public class TCPSessionController{
 			send("+ CONFIRMED " + runtime.lastTelemetry.length);
 		}
 		else {
-			if(!isRecv) {
+			if(!isRecv) { // We don't really need this feature
 				other.log(remoteAddr + " said " + msg.replaceAll("\r\n", ""));
 				send("+ CONFIRMED " + msg.length());
 			}
