@@ -9,10 +9,43 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 
 import configuration.runtime;
 
 public class other {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static int authenticate(String msg) {
+		// Since we don't have a lot of users and we don't need the user:key
+		// pairs to be changed often, we can just embed those into the code
+		if (msg.contains(":")) {
+			String[] pair = msg.split(":");
+
+			HashMap d = new HashMap<String, String>();
+			d.put("can",
+					"3627909A29C31381A071EC27F7C9CA97726182AED29A7DDD2E54353"
+							+ "322CFB30ABB9E3A6DF2AC2C20FE23436311D678564D0C8D305930575F60E2D3D048184D79");
+			d.put("jordan",
+					"3627909A29C31381A071EC27F7C9CA97726182AED29A7DDD2E54353"
+							+ "322CFB30ABB9E3A6DF2AC2C20FE23436311D678564D0C8D305930575F60E2D3D048184D79");
+			d.put("room",
+					"61F1559B07878560A72E897573621B5EFC34DAA75908F20E0046AF9FB8"
+							+ "61192425614E7CBCAAF107359FCE7E77B425704CDDC7CA5F523203B986A802E433AF7F");
+
+			if (pair.length == 2) {
+				String hash = getSHA512Hash(pair[1]).toUpperCase();
+
+				if (d.get(pair[0]).equals(hash)) { // Hash matches
+					if (pair[0].equals("room")) // It is the room logging in
+						return 2;
+					else  						// It is a user logging in
+						return 1;
+				}
+			}
+		}
+		return 0; // Disconnect if the user is still not authenticated at this point
+	}
+	
 	public static String getSHA512Hash(String input){
 		MessageDigest md;
         try {
