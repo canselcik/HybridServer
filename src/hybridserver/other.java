@@ -6,12 +6,39 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import configuration.runtime;
 
 public class other {
+	public static String getSHA512Hash(String input){
+		MessageDigest md;
+        try {
+            md= MessageDigest.getInstance("SHA-512");
+ 
+            md.update(input.getBytes());
+            byte[] mb = md.digest();
+            String out = "";
+            for (int i = 0; i < mb.length; i++) {
+                byte temp = mb[i];
+                String s = Integer.toHexString(new Byte(temp));
+                while (s.length() < 2) {
+                    s = "0" + s;
+                }
+                s = s.substring(s.length() - 2);
+                out += s;
+            }
+            return out;
+ 
+        } catch (Exception e) {
+            log("Algorithm exception: " + e.toString());
+        }
+        
+        return "ERROR";
+	}
+	
 	public static String getArguments(String context){
 		int start = 0;
 	    int end = 0;
