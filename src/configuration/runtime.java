@@ -17,17 +17,19 @@ public class runtime {
 	public static int numberOfPeopleInside = 0;
 	
 	private static DataOutputStream roomPipe = null; 
-	public static void broadcast(String str){
+	public static boolean broadcast(String str){
 		if(roomPipe == null){
-			hybridserver.other.log("Room is offline");
-			return;
+			hybridserver.other.log("Room is offline - not transmitted");
+			return false;
 		}
 		
 		try {
 			roomPipe.writeBytes(str);
+			return true;
 		} 
 		catch (Exception e) {
 			hybridserver.other.log("Error occured while transmitting data to the room");
+			return false;
 		}
 	}
 	public static void setRoomPipe(DataOutputStream str){
