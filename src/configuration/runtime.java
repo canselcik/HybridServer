@@ -6,8 +6,8 @@ import java.util.Date;
 public class runtime {
 	
 	// TODO: Add other dorm switches/statuses here
-	/* TODO: Find a way for the AUTH DORM to connect with the server and recv/transmit realtime communique. You need to sustain a 
-	 * TCP connection with the room to do so. */
+	/* TODO: Make sure the room communicates with the server through TCP effectively. Create all the 
+	 * necessary interfaces so that it is useful. */
 	/* TODO: Make sure the Android client communicates with the server through HTTP effectively. Create all the
 	 * necessary interfaces so that we can get all the info */
 	
