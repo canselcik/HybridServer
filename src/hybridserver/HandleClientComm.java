@@ -27,12 +27,10 @@ public class HandleClientComm implements Runnable {
 		DataOutputStream out = null;
 		BufferedReader in = null;
 		String msg = null;
-		//DataInputStream instr = null;
 		
 		try
 		{		
 			out = new DataOutputStream(cs.getOutputStream());
-			//instr = new DataInputStream(cs.getInputStream());
 			in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
 		}
 		catch(Exception e)
@@ -80,7 +78,7 @@ public class HandleClientComm implements Runnable {
 			out.close();
 			out.flush();
 			cs.close();
-			other.log("Cleaned after " + remoteAddr);
+			other.log("Successfully cleaned after " + remoteAddr);
 		}
 		catch(Exception e){
 			other.log("Error in client thread");
