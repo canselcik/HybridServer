@@ -3,15 +3,11 @@ package hybridserver;
 import hybridserver.Services.TCPSessionController;
 import hybridserver.Services.HTTPResponder;
 import java.io.BufferedReader;
-//import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-import configuration.runtime;
-
 public class HandleClientComm implements Runnable {
-	
 	
 	private Socket cs = null;
 	
@@ -44,25 +40,22 @@ public class HandleClientComm implements Runnable {
 		try {
 			while ( (msg=in.readLine()) != null ) {   
 
-				if(tcp.isRecv == false)
+				if(msg.length() < 40)
 					other.log("[DEBUG] RECEIVED MESSAGE: --->" + msg);
 				
 				// Are we dealing with HTTP? If so, we will disconnect right after the request is processed
 				if (msg.toUpperCase().startsWith("GET")){
 					other.log("HTTP GET REQUEST FROM " + remoteAddr);
-					runtime.incHttpAccess();
 			    	HTTPResponder.evaluateHTTPRequest(msg, 1, out); // GET request defined by 1
 			    	break;
 				}
 				else if (msg.toUpperCase().startsWith("HEAD")){
 					other.log("HTTP HEAD REQUEST FROM " + remoteAddr);
-					runtime.incHttpAccess();
 			    	HTTPResponder.evaluateHTTPRequest(msg, 2, out); // HEAD request defined by 2
 			        break;
 				}
 				
 				// Or simple TCP?
-				runtime.incTcpAccess();
 				if(tcp.evaluate(msg, remoteAddr) == 0) // If we have 0, it means connection should be closed
 					break;
 			}

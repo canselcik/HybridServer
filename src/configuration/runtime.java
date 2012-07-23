@@ -1,7 +1,6 @@
 package configuration;
 
 import java.io.DataOutputStream;
-import java.util.Date;
 
 public class runtime {
 	
@@ -24,7 +23,7 @@ public class runtime {
 		}
 		
 		try {
-			roomPipe.writeBytes(str);
+			roomPipe.writeBytes(str + "\r\n");
 			return true;
 		} 
 		catch (Exception e) {
@@ -35,25 +34,4 @@ public class runtime {
 	public static void setRoomPipe(DataOutputStream str){
 		roomPipe = str;
 	}
-	
-	// INTERNAL SERVER STUFF (NOT REALLY THAT NECESSARY)
-	private static Date init = null;
-	private static int tcpAccess = 0;
-	private static int httpAccess = 0;
-	
-	public runtime(){
-		init = new Date();
-	}
-	
-	public static Date now = null;
-	public static String showUptime(){ // in minutes
-		now = new Date();
-		return String.valueOf((now.getTime()-init.getTime())/(60*1000));
-	}
-	
-	public static int getTcpAccess() { return tcpAccess; }
-	public static int getHttpAccess() { return httpAccess; }
-	
-	public static void incTcpAccess() { tcpAccess++; }
-	public static void incHttpAccess() { httpAccess++; }
 }

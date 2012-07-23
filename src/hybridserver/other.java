@@ -11,8 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 
-import configuration.runtime;
-
 public class other {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static int authenticate(String msg) {
@@ -26,8 +24,8 @@ public class other {
 					"3627909A29C31381A071EC27F7C9CA97726182AED29A7DDD2E54353"
 							+ "322CFB30ABB9E3A6DF2AC2C20FE23436311D678564D0C8D305930575F60E2D3D048184D79");
 			d.put("jordan",
-					"3627909A29C31381A071EC27F7C9CA97726182AED29A7DDD2E54353"
-							+ "322CFB30ABB9E3A6DF2AC2C20FE23436311D678564D0C8D305930575F60E2D3D048184D79");
+					"6EFE7EF02F9D944958E4F61E7F681D3C814C090E0080E84FE75EF5C64ADE9A29A9E557CB364A1C2587C" +
+					"DD33BB67EAB52EB26DA9CA73DB0481F4EBC0368299300");
 			d.put("room",
 					"61F1559B07878560A72E897573621B5EFC34DAA75908F20E0046AF9FB8"
 							+ "61192425614E7CBCAAF107359FCE7E77B425704CDDC7CA5F523203B986A802E433AF7F");
@@ -47,9 +45,8 @@ public class other {
 	}
 	
 	public static String getSHA512Hash(String input){
-		MessageDigest md;
         try {
-            md= MessageDigest.getInstance("SHA-512");
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
  
             md.update(input.getBytes());
             byte[] mb = md.digest();
@@ -186,12 +183,10 @@ public class other {
 	}
 	
 	public static String getStatusInfo(boolean isHTML){
-		String toReturn = "<small>Server Information:<br>HTTP Access:&nbsp;" + String.valueOf(runtime.getHttpAccess()) +
-				"<br>TCP Access:&nbsp;" + String.valueOf(runtime.getTcpAccess()) + 
-				"<br>Uptime:&nbsp;" + runtime.showUptime() + "&nbsp;minutes</small>";
+		String toReturn = "<small>Page brought to you by HybridServer</small>";
 		
 		if(!isHTML)
-			toReturn = toReturn.replaceAll("<br>", "\r\n").replaceAll("&nbsp;", " ").replaceAll("<small>", "").replaceAll("</small>", "");
+			toReturn = toReturn/*.replaceAll("<br>", "\r\n").replaceAll("&nbsp;", " ")*/.replaceAll("<small>", "")/*.replaceAll("</small>", "")*/;
 		
 		return toReturn;
 	}

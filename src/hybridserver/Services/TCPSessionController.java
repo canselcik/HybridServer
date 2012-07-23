@@ -15,10 +15,10 @@ public class TCPSessionController{
 	}
 	
 	public void send(String data) throws IOException{
-		stream.writeBytes(data);
+		stream.writeBytes(data + "\r\n");
 	}
 
-	public boolean isRecv = false;
+	
 	public boolean isAuthenticated = false;
 	public boolean isRoomSession = false;
 	public int evaluate(String msg, String remoteAddr) throws IOException {
@@ -47,51 +47,39 @@ public class TCPSessionController{
 			other.log(remoteAddr + " requested to disconnect");
 			return 0;
 		}
-		else if ( msg.startsWith("broadcast ")) {  // Broadcast data to the room -- for debugging purposes mostly
+		else if ( msg.startsWith("broadcast ")) {  // Broadcast data to the room -- mostly for debugging purposes
 			other.log("Data relayed to the room: " + msg.split(" ")[1]);
 			
 			if(runtime.broadcast("+ EVENT " + msg.split(" ")[1]))
-				stream.writeBytes("+ OK");
+				send("+ OK");
 			else
-				stream.writeBytes("+ ERROR");
+				send("+ ERROR");
 		}
-		else if (msg.equals("status") ){
-			other.log(remoteAddr + " asked for server status data");
-			stream.writeBytes(other.getStatusInfo(false) + "\r\n");
+		else if(msg.equals("ALIVE_SIGNAL") && isRoomSession){
+			// TODO: Room is telling us that it is alive. Implement this into the system so that
+			// we can see the last communication time with the room
 		}
-		else if( msg.equals("startlive") ){
-			isRecv = true;
+		else if( msg.startsWith("livedata") ){
+			if(msg.equals("livedata_error")) {
+				other.log("Room stated that there was an error. Using the last frame instead");
+				return 1; // keep-alive
+			}
 			
-			other.log("Now waiting for telemetry data encoded as LexicalBSD-Base64");
-			send("+ PROCEED");
-		}
-		else if( msg.equals("stoplive") ){
-			isRecv = false;
+			other.log("Done receiveing live telemetry data encoded as LexicalBSD-Base64");
 			
-			other.log("Confirmed done with the telemetry data - broadcasting...");
-			send("+ CONFIRMED " + runtime.lastTelemetry.length);
+			try {
+				runtime.lastTelemetry = DatatypeConverter.parseBase64Binary(msg.replaceFirst("livedata", ""));
+				send("+ CONFIRMED " + runtime.lastTelemetry.length);
+				
+				other.log("Successfully decoded the telemetry data");
+			}
+			catch (Exception e) { other.log("Error occured while decoding telemetry data: " + e.toString()); }
 		}
 		else {
-			if(!isRecv) { // We don't really need this feature
-				other.log(remoteAddr + " said " + msg.replaceAll("\r\n", ""));
-				send("+ CONFIRMED " + msg.length());
-			}
-			else { // Now we are receiving live telemetry data
-				try {
-					runtime.lastTelemetry = DatatypeConverter.parseBase64Binary(msg); 
-					
-					other.log("Telemetry data is decoded - waiting for broadcast notice");
-					send("+ CONFIRMED " + msg.length());
-				}
-				catch (Exception e) {
-					other.log("Error occured while reading telemetry data: " + e.toString());
-					isRecv = false;
-					
-					// Now let's get back the error message
-					runtime.lastTelemetry = other.readFromResource("error.jpg");
-				}
-			}
+			other.log(remoteAddr + " said " + msg);
+			send("+ CONFIRMED " + msg.length());
 		}
+
 		return 1; // keep-alive if not specified otherwise
 	}
 
