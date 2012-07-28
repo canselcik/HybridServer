@@ -34,7 +34,7 @@ public class HTTPResponder {
 		}
 
 		// Let's handle the HEADER
-		if (arguments.equals("live") || arguments.endsWith(".gif") || arguments.endsWith(".jpg") || arguments.endsWith(".png"))
+		if (arguments.startsWith("live?") || arguments.endsWith(".gif") || arguments.endsWith(".jpg") || arguments.endsWith(".png"))
 			out.writeBytes(other.getHTTPHeader(200, 1));
 		else // Assuming that every other file is text/html
 			out.writeBytes(other.getHTTPHeader(200, 5)); 
