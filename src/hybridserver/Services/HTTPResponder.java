@@ -10,7 +10,7 @@ public class HTTPResponder {
 	public static void evaluateHTTPRequest(String context, int method, DataOutputStream out) throws Exception {		
 		String arguments = other.getArguments(context);
 	    
-		if(method != 1){ // If it's not a GET request (tell Not implemented)
+		if(method != 1){ // If it's not a GET request (tell Not Implemented)
 			out.writeBytes(other.getHTTPHeader(501, 0));
 			return;
 		}
@@ -44,8 +44,30 @@ public class HTTPResponder {
 			other.log("RELAYED DATA FROM " + arguments.substring(6));
 			out.writeBytes(other.getHTML(arguments.substring(6)).replace("<body>",
 							"<body><center><p style='font-size:x-large;'>THIS SITE IS RELAYED THROUGH THE 'AUTH' SERVER</p></center>")
-							.replace("</body>", "<center>" + other.getStatusInfo(true) + "</center></body>"));
+							.replace("</body>", "<center><small>This page is brought to you by HybridServer</small></center></body>"));
 		} 
+		else if (arguments.startsWith("status?")){
+			if(other.authenticate( arguments.replace("status?", "") ) == 1) { // TODO: Add more status stuff
+				StringBuffer toDeliver = new StringBuffer();
+				
+				toDeliver.append("Room Connection Information\r\n");
+				toDeliver.append(">>IP:\t\t\t\t\t\t\t\t\t\t\t\t" + runtime.roomIP + "\r\n");
+				toDeliver.append(">>Last Contact:\t\t\t\t\t\t" + runtime.lastRoomComm + "\r\n\r\n");
+				
+				toDeliver.append("Server Information\r\n");
+				toDeliver.append(">>Uptime:\t\t\t\t\t\t\t\t\t" + "NOT IMPLEMENTED\r\n\r\n\r\n"); 
+				
+				toDeliver.append("Room Flags\r\n"); 
+				toDeliver.append(">>Lockdown Status:\t\t\t" + String.valueOf(runtime.underLockdown).toUpperCase() + "\r\n");
+				
+				out.writeBytes(toDeliver.toString());
+				other.log("Fetching for status request");
+			}
+			else {
+				out.writeBytes("Authentication error!");
+				other.log("Authentication error for status request");
+			}
+		}
 		else if (arguments.startsWith("broadcast?")) { // TODO: Add authentication here
 			String toRelay = arguments.replace("broadcast?", "");
 			other.log("HTTP data relay request to the room: " + toRelay);
@@ -55,21 +77,28 @@ public class HTTPResponder {
 			else
 				out.writeBytes("ERROR");
 		} 
-		else if (arguments.equals("live")) { // TODO: Add authentication
-			try {
-				runtime.broadcast("+ SEND_FRAME"); // Ordering new frame
+		else if (arguments.startsWith("live?")) {
+			if(other.authenticate( arguments.replace("live?", "") ) == 1) {
+				try {				
+					runtime.broadcast("+ SEND_FRAME"); // Ordering new frame
+					
+					Thread.sleep(300); // Waiting for the frame to arrive TODO: To be calibrated
+				}
+				catch (Exception e) { other.log("Can't order for a new frame -- sending the last frame instead"); }
 				
-				Thread.sleep(300); // Waiting for the frame to arrive TODO: To be calibrated
+				if (runtime.lastTelemetry == null || runtime.lastTelemetry.length <= 0) {
+					other.log("Video Telemetry frame doesn't exist -- error frame will be transmitted instead");
+					runtime.lastTelemetry = other.readFromResource("error.jpg");
+				}
+				
+				out.write(runtime.lastTelemetry);
+				other.log("Relayed room video telemetry frame through HTTP");
 			}
-			catch (Exception e) { other.log("Can't order for a new frame -- sending the last frame instead"); }
-			
-			if (runtime.lastTelemetry == null || runtime.lastTelemetry.length <= 0) {
-				other.log("Video Telemetry frame doesn't exist -- error frame will be transmitted instead");
-				runtime.lastTelemetry = other.readFromResource("error.jpg");
+			else
+			{
+				out.write(other.readFromResource("auth_error.jpg"));
+				other.log("Live telemetry authentication failed. Streaming auth_error frame");
 			}
-			
-			out.write(runtime.lastTelemetry);
-			other.log("Relayed room video telemetry frame through HTTP");
 		}
 		else if (knownToExist || new File(arguments).exists()) { // Writing the file (if it is there)
 			byte[] file = other.readFile(new File(arguments));
@@ -82,8 +111,7 @@ public class HTTPResponder {
 			out.writeBytes("<html><body>Your HybridServer REQUEST is invalid.<br>Your argument was "
 					+ arguments
 					+ "<br><br><br>AUTH HybridServer is capable of handling raw TCP connections and HTTP GET and HEAD requests.<br><br>"
-					+ "Here are the valid HTTP arguments:<br>-&nbsp;live<br>-&nbsp;Files on the filesystem<br>-&nbsp;broadcast?argument"
-					+ "<br>-&nbsp;relay?http://www.anysite.com<br><br><br>" + other.getStatusInfo(true) + "</body></html>");
+					+ "However, you have to pass multiple authentication layers and know the exact communication syntax.</body></html>");
 		}
 	}
 	

@@ -42,6 +42,8 @@ public class HandleClientComm implements Runnable {
 
 				if(msg.length() < 40)
 					other.log("[DEBUG] RECEIVED MESSAGE: --->" + msg);
+				else
+					other.log("[DEBUG] RECEIVED A LONG MESSAGE == POSSIBLY A BASE64 IMAGE PACKAGE");
 				
 				// Are we dealing with HTTP? If so, we will disconnect right after the request is processed
 				if (msg.toUpperCase().startsWith("GET")){

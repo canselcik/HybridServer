@@ -36,8 +36,12 @@ public class TCPSessionController{
 					other.log("ROOM HAS JUST LOGGED IN -- necessary info will be forwarded to it");
 					runtime.setRoomPipe(stream);
 					send("+ ROOM_STATUS_ASSIGNED");
+					
+					runtime.lastRoomComm = other.getTime();
+					
 					isRoomSession = true;
 					isAuthenticated = true;
+					runtime.roomIP = remoteAddr.substring(1);
 					return 1; // Keep-Alive but skip future succession
 			}
 		}
@@ -55,22 +59,22 @@ public class TCPSessionController{
 			else
 				send("+ ERROR");
 		}
-		else if(msg.equals("ALIVE_SIGNAL") && isRoomSession){
-			// TODO: Room is telling us that it is alive. Implement this into the system so that
-			// we can see the last communication time with the room
+		else if (msg.equals("ALIVE_SIGNAL") && isRoomSession){
+			send("+ CONFIRMED_SIGNAL");
+			runtime.lastRoomComm = other.getTime();
 		}
 		else if( msg.startsWith("livedata") ){
 			if(msg.equals("livedata_error")) {
 				other.log("Room stated that there was an error. Using the last frame instead");
-				return 1; // keep-alive
+				return 1; // early keep-alive
 			}
 			
-			other.log("Done receiveing live telemetry data encoded as LexicalBSD-Base64");
+			other.log("Done receiving live telemetry data encoded as LexicalBSD-Base64");
 			
 			try {
 				runtime.lastTelemetry = DatatypeConverter.parseBase64Binary(msg.replaceFirst("livedata", ""));
-				send("+ CONFIRMED " + runtime.lastTelemetry.length);
-				
+				send("+ CONFIRMED " + runtime.lastTelemetry.length); // sending back the decoded file length but checking it on the otherside
+																     // is futile since we are in a hurry
 				other.log("Successfully decoded the telemetry data");
 			}
 			catch (Exception e) { other.log("Error occured while decoding telemetry data: " + e.toString()); }

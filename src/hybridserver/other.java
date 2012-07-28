@@ -32,8 +32,12 @@ public class other {
 
 			if (pair.length == 2) {
 				String hash = getSHA512Hash(pair[1]).toUpperCase();
-
-				if (d.get(pair[0]).equals(hash)) { // Hash matches
+				String correctHash = (String)d.get(pair[0]);
+				
+				if(correctHash == null)
+					return 0;
+				
+				if (correctHash.equals(hash)) { // Hash matches
 					if (pair[0].equals("room")) // It is the room logging in
 						return 2;
 					else  						// It is a user logging in
@@ -180,15 +184,6 @@ public class other {
 	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	    
 	    return sdf.format(cal.getTime());
-	}
-	
-	public static String getStatusInfo(boolean isHTML){
-		String toReturn = "<small>Page brought to you by HybridServer</small>";
-		
-		if(!isHTML)
-			toReturn = toReturn/*.replaceAll("<br>", "\r\n").replaceAll("&nbsp;", " ")*/.replaceAll("<small>", "")/*.replaceAll("</small>", "")*/;
-		
-		return toReturn;
 	}
 	
 	public static void log(String s) {

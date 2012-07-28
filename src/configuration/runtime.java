@@ -5,16 +5,14 @@ import java.io.DataOutputStream;
 public class runtime {
 	
 	// TODO: Add other dorm switches/statuses here
-	/* TODO: Make sure the room communicates with the server through TCP effectively. Create all the 
-	 * necessary interfaces so that it is useful. */
-	/* TODO: Make sure the Android client communicates with the server through HTTP effectively. Create all the
-	 * necessary interfaces so that we can get all the info */
 	
 	// STUFF THAT THE USER WILL SEE AND INTERACT WITH
 	public static byte[] lastTelemetry = null;
 	public static boolean underLockdown = false;
 	public static int numberOfPeopleInside = 0;
+	public static String lastRoomComm = "NULL";
 	
+	public static String roomIP = "NULL";
 	private static DataOutputStream roomPipe = null; 
 	public static boolean broadcast(String str){
 		if(roomPipe == null){
