@@ -1,9 +1,12 @@
 package hybridserver.Services;
+import hybridserver.EntryPoint;
 import hybridserver.other;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.util.HashMap;
 
-import configuration.runtime;
+import roomRelated.Room;
+
 
 public class HTTPResponder {
 	
@@ -51,47 +54,78 @@ public class HTTPResponder {
 				StringBuffer toDeliver = new StringBuffer();
 				
 				toDeliver.append("Room Connection Information\r\n");
-				toDeliver.append(">>IP:\t\t\t\t\t\t\t\t\t\t\t\t" + runtime.roomIP + "\r\n");
-				toDeliver.append(">>Last Contact:\t\t\t\t\t\t" + runtime.lastRoomComm + "\r\n\r\n");
+				toDeliver.append(">>IP:\t\t\t\t\t\t\t\t\t\t\t\t" + Room.roomIP + "\r\n");
+				toDeliver.append(">>Connection Alive:\t\t\t\t" + String.valueOf(Room.isRoomConnected).toUpperCase() + "\r\n");
+				toDeliver.append(">>Last Contact:\t\t\t\t\t\t" + Room.lastRoomComm + "\r\n\r\n");
 				
-				toDeliver.append("Server Information\r\n");
-				toDeliver.append(">>Uptime:\t\t\t\t\t\t\t\t\t" + "NOT IMPLEMENTED\r\n\r\n\r\n"); 
+				toDeliver.append("Mainframe Information\r\n");
+				toDeliver.append(">>Hostname:\t\t\t\t\t\t\t" + EntryPoint.host + "\r\n"); 
+				toDeliver.append(">>Port:\t\t\t\t\t\t\t\t\t\t\t" + EntryPoint.port + "\r\n");
+				toDeliver.append(">>Online since:\t\t\t\t\t\t" + Room.mainframeStartTime + "\r\n");
+				toDeliver.append(">>Free OS Memory:\t\t\t\t" + other.getFreeMemory() + "\r\n");
+				toDeliver.append(">>Free JVM Memory:\t\t\t" + String.valueOf(Runtime.getRuntime().freeMemory() / 1024) + " kB\r\n\r\n");
+				
+				toDeliver.append("---------------------------------------------\r\n\r\n");
 				
 				toDeliver.append("Room Flags\r\n"); 
-				toDeliver.append(">>Lockdown Status:\t\t\t" + String.valueOf(runtime.underLockdown).toUpperCase() + "\r\n");
+				toDeliver.append(">>Current population:\t\t\t" + Room.numberOfPeopleInside + "\r\n");
+				toDeliver.append(">>Alarm Status:\t\t\t\t\t\t" + String.valueOf(Room.alarmOn).toUpperCase() + "\r\n");
+				toDeliver.append(">>Lockdown Status:\t\t\t" + String.valueOf(Room.underLockdown).toUpperCase() + "\r\n");
 				
 				out.writeBytes(toDeliver.toString());
-				other.log("Fetching for status request");
+				other.log("Fetching data for status request");
 			}
 			else {
 				out.writeBytes("Authentication error!");
 				other.log("Authentication error for status request");
 			}
 		}
-		else if (arguments.startsWith("broadcast?")) { // TODO: Add authentication here
-			String toRelay = arguments.replace("broadcast?", "");
-			other.log("HTTP data relay request to the room: " + toRelay);
+		else if (arguments.startsWith("broadcast?")) { // TODO: Start logging last door unlock etc. -- maybe keep it in a database
+			HashMap<String, String> args = other.getIndividualArguments(arguments.substring(10));
 			
-			if (runtime.broadcast("+ EVENT " + toRelay) == true)
-				out.writeBytes("OK");
-			else
-				out.writeBytes("ERROR");
+			if(args == null){
+				other.log("Invalid arguments for the broadcast request");
+				out.writeBytes("ARGUMENT_ERROR");
+				return;
+			}
+			
+			if(args.containsKey("val") && args.containsKey("auth")){
+				if(other.authenticate(args.get("auth")) == 1){ // user authenticated
+					String toRelay = args.get("val");
+					
+					other.log("HTTP data relay request to the room: " + toRelay);
+					
+					if (Room.broadcast("+ EVENT " + toRelay) == true)
+						out.writeBytes("Immediate delivery successful");
+					else
+						out.writeBytes("Room offline - Scheduled future delivery");
+				}
+				else{
+					other.log("Invalid user/password pair for broadcast request");
+					out.writeBytes("Authentication Error");
+				}
+			}
+			else{
+				other.log("Invalid arguments for the broadcast request");
+				out.writeBytes("ARGUMENT_ERROR");
+			}
+
 		} 
 		else if (arguments.startsWith("live?")) {
 			if(other.authenticate( arguments.replace("live?", "") ) == 1) {
 				try {				
-					runtime.broadcast("+ SEND_FRAME"); // Ordering new frame
+					Room.broadcast("+ SEND_FRAME"); // Ordering new frame
 					
-					Thread.sleep(300); // Waiting for the frame to arrive TODO: To be calibrated
+					Thread.sleep(300);
 				}
 				catch (Exception e) { other.log("Can't order for a new frame -- sending the last frame instead"); }
 				
-				if (runtime.lastTelemetry == null || runtime.lastTelemetry.length <= 0) {
+				if (Room.lastTelemetry == null || Room.lastTelemetry.length <= 0) {
 					other.log("Video Telemetry frame doesn't exist -- error frame will be transmitted instead");
-					runtime.lastTelemetry = other.readFromResource("error.jpg");
+					Room.lastTelemetry = other.readFromResource("error.jpg");
 				}
 				
-				out.write(runtime.lastTelemetry);
+				out.write(Room.lastTelemetry);
 				other.log("Relayed room video telemetry frame through HTTP");
 			}
 			else

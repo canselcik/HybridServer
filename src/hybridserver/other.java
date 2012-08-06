@@ -12,23 +12,77 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 public class other {
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	
+	public static String getFreeMemory(){
+		InputStream is = null;
+		BufferedReader reader = null;
+		String toReturn = "Only for Linux";
+		
+		log("Reading memory info upon request");
+		
+		try{
+			is = Runtime.getRuntime().exec("cat /proc/meminfo").getInputStream();
+			reader = new BufferedReader(new InputStreamReader(is));
+						
+			reader.readLine();
+			toReturn = reader.readLine(); // getting the second line
+			
+			log("FreeMem request answer: " + toReturn);
+			
+			if(!toReturn.contains("MemFree"))
+				toReturn = "Only for Linux";
+			else
+				toReturn = toReturn.replace("MemFree:", "").replace(" ","").replace("kB", " kB");
+		}
+		catch (Exception e){ log(e.toString()); toReturn = "Only for Linux"; }
+		finally{
+			if(reader != null)
+				try { reader.close(); } catch (Exception e) {}
+			if(is!=null)
+				try { is.close(); } catch (Exception ea) {}
+		}
+		
+		//String jvm = "";
+		//try { jvm = " (" + String.valueOf(Runtime.getRuntime().freeMemory()) + ")"; } catch (Exception eaa) {}
+		//return toReturn + jvm;
+		return toReturn;
+	}
+	
+	// can=123123&test=123123&ahaha
+	public static HashMap<String, String> getIndividualArguments(String args){		
+		HashMap<String, String> toReturn = new HashMap<String, String>();
+		
+		if(!args.contains("&") || !args.contains("="))
+			return null;
+		
+		String[] pairs = args.split("&");
+		
+		for(int i = 0; i < pairs.length; i++){
+			String[] varPairs = pairs[i].split("=");
+			
+			if(varPairs.length == 2)
+				toReturn.put(varPairs[0], varPairs[1]);
+		}
+	
+		return toReturn;
+	}
+	
 	public static int authenticate(String msg) {
 		// Since we don't have a lot of users and we don't need the user:key
 		// pairs to be changed often, we can just embed those into the code
 		if (msg.contains(":")) {
 			String[] pair = msg.split(":");
 
-			HashMap d = new HashMap<String, String>();
+			HashMap<String, String> d = new HashMap<String, String>();
 			d.put("can",
 					"3627909A29C31381A071EC27F7C9CA97726182AED29A7DDD2E54353"
 							+ "322CFB30ABB9E3A6DF2AC2C20FE23436311D678564D0C8D305930575F60E2D3D048184D79");
 			d.put("jordan",
-					"6EFE7EF02F9D944958E4F61E7F681D3C814C090E0080E84FE75EF5C64ADE9A29A9E557CB364A1C2587C" +
-					"DD33BB67EAB52EB26DA9CA73DB0481F4EBC0368299300");
+					"1F66F6E85031B4B040D0019ECB929CC9945B9A5ABA4A26DDFE4AD84" 
+							+ "F5AF08E6F03587C9B27E49EFE8589A8472108A04B868B7142A39FF4D42A9BAA6AA4028684");
 			d.put("room",
-					"61F1559B07878560A72E897573621B5EFC34DAA75908F20E0046AF9FB8"
-							+ "61192425614E7CBCAAF107359FCE7E77B425704CDDC7CA5F523203B986A802E433AF7F");
+					"61F1559B07878560A72E897573621B5EFC34DAA75908F20E0046AF9"
+							+ "FB861192425614E7CBCAAF107359FCE7E77B425704CDDC7CA5F523203B986A802E433AF7F");
 
 			if (pair.length == 2) {
 				String hash = getSHA512Hash(pair[1]).toUpperCase();
@@ -48,7 +102,7 @@ public class other {
 		return 0; // Disconnect if the user is still not authenticated at this point
 	}
 	
-	public static String getSHA512Hash(String input){
+	public static String getSHA512Hash(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-512");
  
@@ -123,8 +177,8 @@ public class other {
 
 	    
 	    try {
-			is.close();
-		} 
+	    	is.close();
+	    } 
 	    catch (Exception e) {
 	    	return readFromResource("error.jpg");
 		}
@@ -178,12 +232,12 @@ public class other {
 	    
 	    return bytes;
 	}
-	
-	public static String getTime(){
+
+	public static String getTime() {
 		Calendar cal = Calendar.getInstance();
-	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	    
-	    return sdf.format(cal.getTime());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		return sdf.format(cal.getTime());
 	}
 	
 	public static void log(String s) {

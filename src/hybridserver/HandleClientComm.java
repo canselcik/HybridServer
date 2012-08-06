@@ -7,6 +7,8 @@ import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+import roomRelated.Room;
+
 public class HandleClientComm implements Runnable {
 	
 	private Socket cs = null;
@@ -19,7 +21,7 @@ public class HandleClientComm implements Runnable {
 	public void run(){
 		remoteAddr = cs.getInetAddress().toString();
 		other.log("Client connected from " + remoteAddr);
-		
+	
 		DataOutputStream out = null;
 		BufferedReader in = null;
 		String msg = null;
@@ -40,7 +42,7 @@ public class HandleClientComm implements Runnable {
 		try {
 			while ( (msg=in.readLine()) != null ) {   
 
-				if(msg.length() < 40)
+				if(msg.length() < 100)
 					other.log("[DEBUG] RECEIVED MESSAGE: --->" + msg);
 				else
 					other.log("[DEBUG] RECEIVED A LONG MESSAGE == POSSIBLY A BASE64 IMAGE PACKAGE");
@@ -67,6 +69,9 @@ public class HandleClientComm implements Runnable {
 		}
 		
 		other.log(remoteAddr + " disconnected");
+		
+		if(tcp.isRoomSession)
+			Room.isRoomConnected = false;
 		
 		try{
 			in.close();
