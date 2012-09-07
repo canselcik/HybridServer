@@ -7,32 +7,24 @@ public class Room {
 	
 	private static DataOutputStream roomPipe = null; 
 	public synchronized static boolean broadcast(String str){
-		if(str.startsWith("+ EVENT ") && str.contains("--")){
+		if(str.startsWith("+ EVENT ")){
 			str = str.toUpperCase();
-			String[] pair = str.substring(8).split("--");
-			
-			if(pair.length == 2){
-				boolean newVal = false;
-				boolean validCommand = false;
-				if(pair[1].equals("TRUE")){
-					newVal = true;
-					validCommand = true;
-				}
-				else if(pair[1].equals("FALSE")){
-					newVal = false;
-					validCommand = true;
-				}
-
-				if(validCommand){
-					if(pair[0].equals("ALARM")){
-						Room.alarmOn = newVal;
-						other.log("ALARM is locally set to " + pair[1]);
-					}
-					else if(pair[0].equals("LOCKDOWN")){
-						Room.underLockdown = newVal;
-						other.log("LOCKDOWN is locally set to " + pair[1]);
-					}
-				}
+			String temp = str.substring(8);
+			if(temp.equals("ALARM_ON")){
+				Room.alarmOn = true;
+				other.log("ALARM is locally set to TRUE");
+			}
+			else if(temp.equals("ALARM_OFF")){
+				Room.alarmOn = false;
+				other.log("ALARM is locally set to FALSE");
+			}
+			else if(temp.equals("LOCKDOWN_ON")){
+				Room.underLockdown = true;
+				other.log("LOCKDOWN is locally set to TRUE");
+			}
+			else if(temp.equals("LOCKDOWN_OFF")){
+				Room.underLockdown = false;
+				other.log("LOCKDOWN is locally set to FALSE");
 			}
 		}
 		

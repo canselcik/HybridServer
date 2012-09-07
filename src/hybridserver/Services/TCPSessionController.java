@@ -42,8 +42,16 @@ public class TCPSessionController{
 					Room.broadcast("+ ROOM_STATUS_ASSIGNED");
 					
 					// Now we are sending the room flags so that the room can reconcile
-					Room.broadcast("+ EVENT ALARM--" + String.valueOf(Room.alarmOn));
-					Room.broadcast("+ EVENT LOCKDOWN--" + String.valueOf(Room.underLockdown));
+					if(Room.alarmOn)
+						Room.broadcast("+ EVENT ALARM_ON");
+					else
+						Room.broadcast("+ EVENT ALARM_OFF");
+					
+					if(Room.underLockdown)
+						Room.broadcast("+ EVENT LOCKDOWN_ON");
+					else
+						Room.broadcast("+ EVENT LOCKDOWN_OFF");
+
 					other.log("Reconciling with the room -> local variables are synced to the room");
 					
 					Room.lastRoomComm = other.getTime();
